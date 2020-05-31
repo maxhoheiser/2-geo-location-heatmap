@@ -1,4 +1,5 @@
 import exifread
+import os
 
 """
 Script to generate a heatmap from geo locations derived from different sources
@@ -9,7 +10,7 @@ Script to generate a heatmap from geo locations derived from different sources
 
 #=============================================================================
 ROOT = "/"
-IMAGES = ["jpeg", "jpg", "png", "raw"]
+IMAGES = ("jpeg", "jpg", "raw")
 #=============================================================================
 
 
@@ -24,14 +25,33 @@ def file_crawler(folder, extention):
         if name.endswith((extention))]
     return files
 
+def gps_extractor(file):
+    gps_keys = ['GPS GPSAltitude', 'GPS GPSLatitude', 'EXIF DateTimeOriginal', 'GPS GPSLongitude']
+    gps = dict()
+    with open(path_name, 'rb') as f:
+        tags = exifread.process_file(f, details=False)
+    for key in tags.keys():
+        if key in gps_keys:
+            gps[key] = tags[key].printable
+    #gps[key] = [tags[key] for key in tags.keys() if 'GPS' in key]
+    if len(gps) == 0:
+        return None
+    else: 
+        return gps
 
 #=============================================================================
+
 
 
 
 #=============================================================================
 # main code loop
-files = file_crawler(ROOT, IMAGES)
+folder = r"/home/max/ExpanDrive/Google Drive/3.1 Code Repository/2-geo-location-heatmap/test_fotos"
+files = file_crawler(folder, IMAGES)
+files_dict = dict()
+for file in files:
+    files_dict[file] = gps_extractor(file)
+
 
 
 
